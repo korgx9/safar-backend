@@ -1,12 +1,13 @@
 package routes
 
 import (
-	"github.com/korgx9/safar-backend/internal/handlers"
-
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+
+	"github.com/korgx9/safar-backend/internal/handlers"
 )
 
-func SetupRouter() *gin.Engine {
+func SetupRouter(db *gorm.DB) *gin.Engine {
 
 	r := gin.Default()
 

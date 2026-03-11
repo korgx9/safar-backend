@@ -3,10 +3,10 @@ package main
 import (
 	"log"
 
+	"github.com/joho/godotenv"
+
 	"github.com/korgx9/safar-backend/internal/config"
 	"github.com/korgx9/safar-backend/internal/routes"
-
-	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -18,7 +18,9 @@ func main() {
 
 	cfg := config.LoadConfig()
 
-	router := routes.SetupRouter()
+	db := config.InitDB(cfg)
+
+	router := routes.SetupRouter(db)
 
 	log.Println("Server starting on port", cfg.Port)
 
