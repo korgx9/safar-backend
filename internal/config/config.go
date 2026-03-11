@@ -5,12 +5,12 @@ import (
 )
 
 type Config struct {
-	Port  string
-	DBUrl string
+	Port      string
+	DBUrl     string
+	JWTSecret string
 }
 
 func LoadConfig() Config {
-
 	port := os.Getenv("HTTP_PORT")
 
 	db := "host=" + os.Getenv("DB_HOST") +
@@ -21,7 +21,8 @@ func LoadConfig() Config {
 		" sslmode=" + os.Getenv("DB_SSLMODE")
 
 	return Config{
-		Port:  port,
-		DBUrl: db,
+		Port:      port,
+		DBUrl:     db,
+		JWTSecret: os.Getenv("JWT_SECRET"),
 	}
 }

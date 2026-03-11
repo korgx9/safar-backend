@@ -1,0 +1,53 @@
+meta {
+  name: Send OTP
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/send-otp
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  accept: application/json
+}
+
+body {
+  {
+    "phone_number": "{{phoneNumber}}"
+  }
+}
+
+script:post-response {
+  const phone = bru.getEnvVar('phoneNumber');
+  bru.setVar('lastPhoneNumber', phone);
+}
+
+tests {
+  test("status is 200 or 201", function () {
+    expect([200, 201]).to.include(res.getStatus());
+  });
+
+  test("response is json", function () {
+    const contentType = res.getHeader("content-type") || "";
+    expect(contentType.toLowerCase()).to.contain("application/json");
+  });
+
+  test("response does not contain error", function () {
+    const body = res.getBody();
+    if (body && typeof body === "object") {
+      expect(body.error).to.not.exist;
+    }
+  });
+}
+
+docs {
+  Sends an OTP to the phone number from the current environment.
+
+  For local testing, your backend may either:
+  - generate a random OTP and log it, or
+  - use a fixed OTP such as 123456 in dev mode.
+}

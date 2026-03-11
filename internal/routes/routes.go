@@ -7,11 +7,18 @@ import (
 	"github.com/korgx9/safar-backend/internal/handlers"
 )
 
-func SetupRouter(db *gorm.DB) *gin.Engine {
+func SetupRouter(db *gorm.DB, jwtSecret string) *gin.Engine {
 
 	r := gin.Default()
-
 	r.GET("/health", handlers.HealthCheck)
+
+	authHandler := handlers.NewAuthHandler(db, jwtSecret)
+
+	auth := r.Group("/auth")
+	{
+		auth.POST("/send-otp", authHandler.SendOTP)
+		auth.POST("/verify-otp", authHandler.VerifyOTP)
+	}
 
 	return r
 }

@@ -1,0 +1,13 @@
+vars:pre-request {
+  apiPrefix: /auth
+}
+
+docs {
+  Safar backend auth collection.
+
+  Flow:
+  1. Run `Send OTP`
+  2. Take the OTP code from your backend logs or fixed local dev value.
+  3. Put that code into the `otpCode` environment variable.
+  4. Run `Verify OTP`
+}
