@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:15
+    container_name: safar_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: safar
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - safar_pgdata:/var/lib/postgresql/data
+
+volumes:
+  safar_pgdata:
