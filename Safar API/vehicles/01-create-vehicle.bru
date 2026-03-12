@@ -1,0 +1,54 @@
+meta {
+  name: Create Vehicle
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/vehicles
+  body: json
+}
+
+headers {
+  authorization: Bearer {{accessToken}}
+  content-type: application/json
+  accept: application/json
+}
+
+body:json {
+  {
+    "seats_total": {{vehicleSeatsTotal}}
+  }
+}
+
+tests {
+  test("status is 201", function () {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("response is json", function () {
+    const contentType = res.getHeader("content-type") || "";
+    expect(contentType.toLowerCase()).to.contain("application/json");
+  });
+
+  test("vehicle fields exist", function () {
+    const body = res.getBody();
+    expect(body.id).to.exist;
+    expect(body.user_id).to.exist;
+    expect(body.seats_total).to.exist;
+  });
+
+  test("save vehicle id to environment", function () {
+    const body = res.getBody();
+    if (body && body.id) {
+      bru.setEnvVar("vehicleId", String(body.id));
+    } else {
+      throw new Error("vehicle id not found in response");
+    }
+  });
+}
+
+docs {
+  Creates a vehicle for the authenticated user.
+  Requires Bearer token in `accessToken` and seats value from `vehicleSeatsTotal`.
+}

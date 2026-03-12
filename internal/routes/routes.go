@@ -21,10 +21,14 @@ func SetupRouter(db *gorm.DB, jwtSecret string) *gin.Engine {
 	}
 
 	userHandler := handlers.NewUserHandler(db)
+	vehicleHandler := handlers.NewVehicleHandler(db)
+
 	protected := r.Group("/")
 	protected.Use(middleware.AuthMiddleware(jwtSecret))
 	{
 		protected.GET("/me", userHandler.Me)
+		protected.POST("/vehicles", vehicleHandler.Create)
+		protected.GET("/vehicles", vehicleHandler.List)
 	}
 
 	return r

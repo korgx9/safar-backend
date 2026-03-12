@@ -20,6 +20,7 @@ func InitDB(cfg Config) *gorm.DB {
 	err = db.AutoMigrate(
 		&models.User{},
 		&models.OTPCode{},
+		&models.Vehicle{},
 	)
 	if err != nil {
 		log.Fatal("failed to migrate database:", err)
