@@ -15,7 +15,7 @@ headers {
   accept: application/json
 }
 
-body {
+body:json {
   {
     "phone_number": "{{phoneNumber}}",
     "code": "{{otpCode}}"
@@ -26,12 +26,12 @@ tests {
   test("status is 200 or 201", function () {
     expect([200, 201]).to.include(res.getStatus());
   });
-
+  
   test("response is json", function () {
     const contentType = res.getHeader("content-type") || "";
     expect(contentType.toLowerCase()).to.contain("application/json");
   });
-
+  
   test("response does not contain auth error", function () {
     const body = res.getBody();
     if (body && typeof body === "object" && body.error) {
@@ -42,6 +42,68 @@ tests {
 
 docs {
   Verifies the OTP code from the `otpCode` environment variable.
+  
+  Update `otpCode` in `environments/local.bru` or inside Bruno before running this request.
+}
+meta {
+  name: Verify OTP
+  type: http
+  seq: 2
+}
 
+post {
+  url: {{baseUrl}}{{apiPrefix}}/verify-otp
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  accept: application/json
+}
+
+body:json {
+  {
+    "phone_number": "{{phoneNumber}}",
+    "code": "{{otpCode}}"
+  }
+}
+
+tests {
+  test("status is 200 or 201", function () {
+    expect([200, 201]).to.include(res.getStatus());
+  });
+  
+  test("response is json", function () {
+    const contentType = res.getHeader("content-type") || "";
+    expect(contentType.toLowerCase()).to.contain("application/json");
+  });
+  
+  test("response does not contain auth error", function () {
+    const body = res.getBody();
+    if (body && typeof body === "object" && body.error) {
+      throw new Error(`API returned error: ${body.error}`);
+    }
+  });
+
+  test("access token exists", function () {
+    const body = res.getBody();
+    expect(body.access_token).to.exist;
+  });
+
+  test("save access token to environment", function () {
+    const body = res.getBody();
+    if (body && body.access_token) {
+      bru.setEnvVar("accessToken", body.access_token);
+    } else {
+      throw new Error("access_token not found in response");
+    }
+  });
+}
+
+docs {
+  Verifies the OTP code from the `otpCode` environment variable.
+  Saves `access_token` to `accessToken` automatically after success.
+  
   Update `otpCode` in `environments/local.bru` or inside Bruno before running this request.
 }

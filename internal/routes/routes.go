@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/korgx9/safar-backend/internal/handlers"
+	"github.com/korgx9/safar-backend/internal/middleware"
 )
 
 func SetupRouter(db *gorm.DB, jwtSecret string) *gin.Engine {
@@ -13,11 +14,17 @@ func SetupRouter(db *gorm.DB, jwtSecret string) *gin.Engine {
 	r.GET("/health", handlers.HealthCheck)
 
 	authHandler := handlers.NewAuthHandler(db, jwtSecret)
-
 	auth := r.Group("/auth")
 	{
 		auth.POST("/send-otp", authHandler.SendOTP)
 		auth.POST("/verify-otp", authHandler.VerifyOTP)
+	}
+
+	userHandler := handlers.NewUserHandler(db)
+	protected := r.Group("/")
+	protected.Use(middleware.AuthMiddleware(jwtSecret))
+	{
+		protected.GET("/me", userHandler.Me)
 	}
 
 	return r
