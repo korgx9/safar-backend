@@ -22,6 +22,7 @@ func SetupRouter(db *gorm.DB, jwtSecret string) *gin.Engine {
 
 	userHandler := handlers.NewUserHandler(db)
 	vehicleHandler := handlers.NewVehicleHandler(db)
+	tripHandler := handlers.NewTripHandler(db)
 
 	protected := r.Group("/")
 	protected.Use(middleware.AuthMiddleware(jwtSecret))
@@ -29,6 +30,8 @@ func SetupRouter(db *gorm.DB, jwtSecret string) *gin.Engine {
 		protected.GET("/me", userHandler.Me)
 		protected.POST("/vehicles", vehicleHandler.Create)
 		protected.GET("/vehicles", vehicleHandler.List)
+		protected.POST("/driver/trips", tripHandler.Create)
+		protected.GET("/driver/trips", tripHandler.ListMy)
 	}
 
 	return r
