@@ -22,8 +22,16 @@
    - Files: `migrations/`, `internal/config/database.go`
    - Note: use explicit migration tooling for reproducible schema changes.
 
+6. Store cities in a dedicated table and reference them from trips.
+   - Files: `internal/models/`, `internal/handlers/trip_handler.go`, `migrations/`
+   - Note: normalize city data (e.g., `cities` table + foreign keys) to avoid duplicates and simplify validation/search.
+
+7. Standardize API error payload with machine-readable code/key for client localization.
+   - Files: all handlers in `internal/handlers/`
+   - Note: include stable `error_code` (or `error_key`) in every error response so mobile/web clients can map localized messages.
+
 ## Medium Priority
 
-6. Clean duplicated request definition in Bruno collection.
+8. Clean duplicated request definition in Bruno collection.
    - File: `Safar API/auth/02-verify-otp.bru`
    - Note: keep a single `Verify OTP` block with token save logic.
