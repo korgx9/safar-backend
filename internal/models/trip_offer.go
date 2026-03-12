@@ -6,6 +6,7 @@ const (
 	TripStatusActive    = "active"
 	TripStatusFull      = "full"
 	TripStatusCancelled = "cancelled"
+	TripStatusExpired   = "expired"
 )
 
 type TripOffer struct {

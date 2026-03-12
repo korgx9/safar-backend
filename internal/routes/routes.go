@@ -25,6 +25,7 @@ func SetupRouter(db *gorm.DB, jwtSecret string) *gin.Engine {
 	tripHandler := handlers.NewTripHandler(db)
 	passengerSearchHandler := handlers.NewPassengerSearchHandler(db)
 	bookingHandler := handlers.NewBookingHandler(db)
+	adminHandler := handlers.NewAdminHandler(db)
 
 	protected := r.Group("/")
 	protected.Use(middleware.AuthMiddleware(jwtSecret))
@@ -54,6 +55,11 @@ func SetupRouter(db *gorm.DB, jwtSecret string) *gin.Engine {
 			bookings.POST("", bookingHandler.Create)
 			bookings.GET("/my", bookingHandler.ListMy)
 			bookings.PATCH("/:id/cancel", bookingHandler.Cancel)
+		}
+
+		admin := protected.Group("/admin")
+		{
+			admin.POST("/cleanup/expired-trips", adminHandler.CleanupExpiredTrips)
 		}
 	}
 

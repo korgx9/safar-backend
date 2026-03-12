@@ -38,8 +38,12 @@
    - Files: all handlers in `internal/handlers/`
    - Note: include stable `error_code` (or `error_key`) in every error response so mobile/web clients can map localized messages.
 
+10. Restrict admin/debug endpoints by role-based access control.
+   - Files: `internal/routes/routes.go`, `internal/middleware/`, `internal/models/user.go`
+   - Note: `/admin/*` routes should be accessible only for authorized admin roles, not all authenticated users.
+
 ## Medium Priority
 
-10. Clean duplicated request definition in Bruno collection.
+11. Clean duplicated request definition in Bruno collection.
    - File: `Safar API/auth/02-verify-otp.bru`
    - Note: keep a single `Verify OTP` block with token save logic.
