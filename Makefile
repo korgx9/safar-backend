@@ -18,6 +18,9 @@ docker-down:
 deps:
 	go mod tidy
 
+swagger:
+	go run github.com/swaggo/swag/cmd/swag init -g cmd/api/main.go -o docs --parseInternal
+
 format:
 	go fmt ./...
 

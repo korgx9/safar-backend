@@ -2,6 +2,8 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/gorm"
 
 	"github.com/korgx9/safar-backend/internal/handlers"
@@ -12,6 +14,7 @@ func SetupRouter(db *gorm.DB, jwtSecret string) *gin.Engine {
 
 	r := gin.Default()
 	r.GET("/health", handlers.HealthCheck)
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	authHandler := handlers.NewAuthHandler(db, jwtSecret)
 	auth := r.Group("/auth")

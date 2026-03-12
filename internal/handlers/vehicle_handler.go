@@ -17,6 +17,19 @@ func NewVehicleHandler(db *gorm.DB) *VehicleHandler {
 	return &VehicleHandler{db: db}
 }
 
+// Create godoc
+// @Summary Create vehicle
+// @Description Creates a vehicle for the authenticated user.
+// @Tags Vehicles
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body models.CreateVehicleRequest true "Create vehicle request"
+// @Success 201 {object} models.Vehicle
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /vehicles [post]
 func (h *VehicleHandler) Create(c *gin.Context) {
 	userIDValue, exists := c.Get("user_id")
 	if !exists {
@@ -49,6 +62,16 @@ func (h *VehicleHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, vehicle)
 }
 
+// List godoc
+// @Summary List my vehicles
+// @Description Returns vehicles owned by the authenticated user.
+// @Tags Vehicles
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} models.Vehicle
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /vehicles [get]
 func (h *VehicleHandler) List(c *gin.Context) {
 	userIDValue, exists := c.Get("user_id")
 	if !exists {

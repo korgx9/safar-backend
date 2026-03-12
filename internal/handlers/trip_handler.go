@@ -20,6 +20,21 @@ func NewTripHandler(db *gorm.DB) *TripHandler {
 	return &TripHandler{db: db}
 }
 
+// Create godoc
+// @Summary Create trip offer
+// @Description Creates a driver trip offer using one of current user's vehicles.
+// @Tags Driver Trips
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body models.CreateTripRequest true "Create trip request"
+// @Success 201 {object} models.TripOffer
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 403 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /driver/trips [post]
 func (h *TripHandler) Create(c *gin.Context) {
 	userIDValue, exists := c.Get("user_id")
 	if !exists {
@@ -102,6 +117,16 @@ func (h *TripHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, trip)
 }
 
+// ListMy godoc
+// @Summary List my trip offers
+// @Description Returns trip offers created by the authenticated driver.
+// @Tags Driver Trips
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} models.TripOffer
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /driver/trips [get]
 func (h *TripHandler) ListMy(c *gin.Context) {
 	userIDValue, exists := c.Get("user_id")
 	if !exists {

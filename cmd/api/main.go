@@ -1,3 +1,10 @@
+// @title Safar Backend API
+// @version 1.0
+// @description MVP backend for Safar ride-sharing platform
+// @BasePath /
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 package main
 
 import (
@@ -5,6 +12,7 @@ import (
 
 	"github.com/joho/godotenv"
 
+	_ "github.com/korgx9/safar-backend/docs"
 	"github.com/korgx9/safar-backend/internal/config"
 	"github.com/korgx9/safar-backend/internal/routes"
 )

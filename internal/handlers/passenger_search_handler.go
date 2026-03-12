@@ -23,6 +23,20 @@ func NewPassengerSearchHandler(db *gorm.DB) *PassengerSearchHandler {
 	return &PassengerSearchHandler{db: db}
 }
 
+// Search godoc
+// @Summary Search trips queue
+// @Description Creates a search session and returns the first matching trip in queue.
+// @Tags Passenger Search
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body models.SearchTripsRequest true "Search trips request"
+// @Success 200 {object} models.SearchTripResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /passenger/search [post]
 func (h *PassengerSearchHandler) Search(c *gin.Context) {
 	passengerIDValue, exists := c.Get("user_id")
 	if !exists {
@@ -100,6 +114,20 @@ func (h *PassengerSearchHandler) Search(c *gin.Context) {
 	})
 }
 
+// Next godoc
+// @Summary Get next trip in queue
+// @Description Returns the next matching trip from an existing search session queue.
+// @Tags Passenger Search
+// @Produce json
+// @Security BearerAuth
+// @Param sessionId path int true "Search session ID"
+// @Success 200 {object} models.SearchTripResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 403 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /passenger/search/{sessionId}/next [post]
 func (h *PassengerSearchHandler) Next(c *gin.Context) {
 	passengerIDValue, exists := c.Get("user_id")
 	if !exists {

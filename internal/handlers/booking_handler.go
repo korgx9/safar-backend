@@ -29,6 +29,20 @@ func NewBookingHandler(db *gorm.DB) *BookingHandler {
 	return &BookingHandler{db: db}
 }
 
+// Create godoc
+// @Summary Create booking
+// @Description Creates a passenger booking for an active trip if seats are available.
+// @Tags Bookings
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body models.CreateBookingRequest true "Create booking request"
+// @Success 201 {object} models.Booking
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /bookings [post]
 func (h *BookingHandler) Create(c *gin.Context) {
 	passengerIDValue, exists := c.Get("user_id")
 	if !exists {
@@ -118,6 +132,16 @@ func (h *BookingHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, createdBooking)
 }
 
+// ListMy godoc
+// @Summary List my bookings
+// @Description Returns bookings owned by the authenticated passenger.
+// @Tags Bookings
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} models.Booking
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /bookings/my [get]
 func (h *BookingHandler) ListMy(c *gin.Context) {
 	passengerIDValue, exists := c.Get("user_id")
 	if !exists {
@@ -140,6 +164,20 @@ func (h *BookingHandler) ListMy(c *gin.Context) {
 	c.JSON(http.StatusOK, bookings)
 }
 
+// Cancel godoc
+// @Summary Cancel booking
+// @Description Cancels a passenger booking and restores seats to the trip.
+// @Tags Bookings
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Booking ID"
+// @Success 200 {object} models.Booking
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 403 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /bookings/{id}/cancel [patch]
 func (h *BookingHandler) Cancel(c *gin.Context) {
 	passengerIDValue, exists := c.Get("user_id")
 	if !exists {
