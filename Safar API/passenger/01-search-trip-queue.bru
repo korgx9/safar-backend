@@ -1,0 +1,57 @@
+meta {
+  name: Search Trip Queue
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/passenger/search
+  body: json
+}
+
+headers {
+  authorization: Bearer {{accessToken}}
+  content-type: application/json
+  accept: application/json
+}
+
+body:json {
+  {
+    "origin": "{{searchOrigin}}",
+    "destination": "{{searchDestination}}",
+    "trip_date": "{{searchTripDate}}",
+    "requested_seats": {{searchRequestedSeats}}
+  }
+}
+
+tests {
+  test("status is 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("response is json", function () {
+    const contentType = res.getHeader("content-type") || "";
+    expect(contentType.toLowerCase()).to.contain("application/json");
+  });
+
+  test("search response fields exist", function () {
+    const body = res.getBody();
+    expect(body.search_session_id).to.exist;
+    expect(body.trip).to.exist;
+    expect(body.is_first_in_queue).to.equal(true);
+  });
+
+  test("save search session id to environment", function () {
+    const body = res.getBody();
+    if (body && body.search_session_id) {
+      bru.setEnvVar("searchSessionId", String(body.search_session_id));
+    } else {
+      throw new Error("search_session_id not found in response");
+    }
+  });
+}
+
+docs {
+  Starts passenger trip search queue and returns the first matching active trip.
+  Saves `search_session_id` to `searchSessionId` for the next request.
+}
