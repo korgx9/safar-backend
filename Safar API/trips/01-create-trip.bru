@@ -52,6 +52,7 @@ tests {
     const body = res.getBody();
     if (body && body.id) {
       bru.setEnvVar("tripId", String(body.id));
+      bru.setEnvVar("bookingTripOfferId", String(body.id));
     } else {
       throw new Error("trip id not found in response");
     }

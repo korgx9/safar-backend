@@ -23,6 +23,7 @@ func InitDB(cfg Config) *gorm.DB {
 		&models.Vehicle{},
 		&models.TripOffer{},
 		&models.SearchSession{},
+		&models.Booking{},
 	)
 	if err != nil {
 		log.Fatal("failed to migrate database:", err)

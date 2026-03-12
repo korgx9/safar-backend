@@ -1,0 +1,58 @@
+meta {
+  name: Create Booking
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/bookings
+  body: json
+}
+
+headers {
+  authorization: Bearer {{accessToken}}
+  content-type: application/json
+  accept: application/json
+}
+
+body:json {
+  {
+    "trip_offer_id": {{bookingTripOfferId}},
+    "requested_seats": {{bookingRequestedSeats}},
+    "warning_acknowledged": {{bookingWarningAcknowledged}}
+  }
+}
+
+tests {
+  test("status is 201", function () {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("response is json", function () {
+    const contentType = res.getHeader("content-type") || "";
+    expect(contentType.toLowerCase()).to.contain("application/json");
+  });
+
+  test("booking fields exist", function () {
+    const body = res.getBody();
+    expect(body.id).to.exist;
+    expect(body.trip_offer_id).to.exist;
+    expect(body.passenger_id).to.exist;
+    expect(body.requested_seats).to.exist;
+    expect(body.status).to.equal("confirmed");
+  });
+
+  test("save booking id to environment", function () {
+    const body = res.getBody();
+    if (body && body.id) {
+      bru.setEnvVar("bookingId", String(body.id));
+    } else {
+      throw new Error("booking id not found in response");
+    }
+  });
+}
+
+docs {
+  Creates a passenger booking for a trip.
+  Use `bookingTripOfferId` from created trip and pass `bookingWarningAcknowledged` if needed.
+}
