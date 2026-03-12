@@ -40,19 +40,19 @@ func NewPassengerSearchHandler(db *gorm.DB) *PassengerSearchHandler {
 func (h *PassengerSearchHandler) Search(c *gin.Context) {
 	passengerIDValue, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found in context"})
+		respondWithError(c, http.StatusUnauthorized, "user not found in context")
 		return
 	}
 
 	passengerID, ok := passengerIDValue.(uint)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user id in context"})
+		respondWithError(c, http.StatusUnauthorized, "invalid user id in context")
 		return
 	}
 
 	var req models.SearchTripsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		respondWithError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -60,24 +60,24 @@ func (h *PassengerSearchHandler) Search(c *gin.Context) {
 	destination := strings.TrimSpace(req.Destination)
 
 	if origin == "" || destination == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "origin and destination are required"})
+		respondWithError(c, http.StatusBadRequest, "origin and destination are required")
 		return
 	}
 
 	if strings.EqualFold(origin, destination) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "origin and destination must be different"})
+		respondWithError(c, http.StatusBadRequest, "origin and destination must be different")
 		return
 	}
 
 	if req.RequestedSeats < 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "requested_seats must be at least 1"})
+		respondWithError(c, http.StatusBadRequest, "requested_seats must be at least 1")
 		return
 	}
 
 	requestDayStart, _ := dayRangeUTC(req.TripDate)
 	todayStart, _ := dayRangeUTC(time.Now())
 	if requestDayStart.Before(todayStart) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "trip_date must not be in the past"})
+		respondWithError(c, http.StatusBadRequest, "trip_date must not be in the past")
 		return
 	}
 
@@ -91,18 +91,18 @@ func (h *PassengerSearchHandler) Search(c *gin.Context) {
 	}
 
 	if err := h.db.Create(&session).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create search session"})
+		respondWithError(c, http.StatusInternalServerError, "failed to create search session")
 		return
 	}
 
 	trip, err := h.findTripByOffset(session, 0)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "no trips found"})
+			respondWithError(c, http.StatusNotFound, "no trips found")
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to search trips"})
+		respondWithError(c, http.StatusInternalServerError, "failed to search trips")
 		return
 	}
 
@@ -131,36 +131,36 @@ func (h *PassengerSearchHandler) Search(c *gin.Context) {
 func (h *PassengerSearchHandler) Next(c *gin.Context) {
 	passengerIDValue, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found in context"})
+		respondWithError(c, http.StatusUnauthorized, "user not found in context")
 		return
 	}
 
 	passengerID, ok := passengerIDValue.(uint)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user id in context"})
+		respondWithError(c, http.StatusUnauthorized, "invalid user id in context")
 		return
 	}
 
 	sessionIDValue := c.Param("sessionId")
 	sessionID, err := strconv.ParseUint(sessionIDValue, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid session id"})
+		respondWithError(c, http.StatusBadRequest, "invalid session id")
 		return
 	}
 
 	var session models.SearchSession
 	if err := h.db.First(&session, uint(sessionID)).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "search session not found"})
+			respondWithError(c, http.StatusNotFound, "search session not found")
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch search session"})
+		respondWithError(c, http.StatusInternalServerError, "failed to fetch search session")
 		return
 	}
 
 	if session.PassengerID != passengerID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "search session does not belong to current user"})
+		respondWithError(c, http.StatusForbidden, "search session does not belong to current user")
 		return
 	}
 
@@ -168,17 +168,17 @@ func (h *PassengerSearchHandler) Next(c *gin.Context) {
 	trip, err := h.findTripByOffset(session, nextOffset)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "no more trips in queue"})
+			respondWithError(c, http.StatusNotFound, "no more trips in queue")
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to search next trip"})
+		respondWithError(c, http.StatusInternalServerError, "failed to search next trip")
 		return
 	}
 
 	session.CurrentOffset = nextOffset
 	if err := h.db.Save(&session).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update search session"})
+		respondWithError(c, http.StatusInternalServerError, "failed to update search session")
 		return
 	}
 

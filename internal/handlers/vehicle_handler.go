@@ -33,19 +33,19 @@ func NewVehicleHandler(db *gorm.DB) *VehicleHandler {
 func (h *VehicleHandler) Create(c *gin.Context) {
 	userIDValue, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found in context"})
+		respondWithError(c, http.StatusUnauthorized, "user not found in context")
 		return
 	}
 
 	userID, ok := userIDValue.(uint)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user id in context"})
+		respondWithError(c, http.StatusUnauthorized, "invalid user id in context")
 		return
 	}
 
 	var req models.CreateVehicleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		respondWithError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -55,7 +55,7 @@ func (h *VehicleHandler) Create(c *gin.Context) {
 	}
 
 	if err := h.db.Create(&vehicle).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create vehicle"})
+		respondWithError(c, http.StatusInternalServerError, "failed to create vehicle")
 		return
 	}
 
@@ -75,19 +75,19 @@ func (h *VehicleHandler) Create(c *gin.Context) {
 func (h *VehicleHandler) List(c *gin.Context) {
 	userIDValue, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found in context"})
+		respondWithError(c, http.StatusUnauthorized, "user not found in context")
 		return
 	}
 
 	userID, ok := userIDValue.(uint)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user id in context"})
+		respondWithError(c, http.StatusUnauthorized, "invalid user id in context")
 		return
 	}
 
 	var vehicles []models.Vehicle
 	if err := h.db.Where("user_id = ?", userID).Find(&vehicles).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch vehicles"})
+		respondWithError(c, http.StatusInternalServerError, "failed to fetch vehicles")
 		return
 	}
 

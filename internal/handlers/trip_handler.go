@@ -38,19 +38,19 @@ func NewTripHandler(db *gorm.DB) *TripHandler {
 func (h *TripHandler) Create(c *gin.Context) {
 	userIDValue, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found in context"})
+		respondWithError(c, http.StatusUnauthorized, "user not found in context")
 		return
 	}
 
 	driverID, ok := userIDValue.(uint)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user id in context"})
+		respondWithError(c, http.StatusUnauthorized, "invalid user id in context")
 		return
 	}
 
 	var req models.CreateTripRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		respondWithError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -58,43 +58,43 @@ func (h *TripHandler) Create(c *gin.Context) {
 	destination := strings.TrimSpace(req.Destination)
 
 	if origin == "" || destination == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "origin and destination are required"})
+		respondWithError(c, http.StatusBadRequest, "origin and destination are required")
 		return
 	}
 
 	if strings.EqualFold(origin, destination) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "origin and destination must be different"})
+		respondWithError(c, http.StatusBadRequest, "origin and destination must be different")
 		return
 	}
 
 	if req.TripDate.Before(time.Now()) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "trip_date must not be in the past"})
+		respondWithError(c, http.StatusBadRequest, "trip_date must not be in the past")
 		return
 	}
 
 	if req.AvailableSeats < 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "available_seats must be at least 1"})
+		respondWithError(c, http.StatusBadRequest, "available_seats must be at least 1")
 		return
 	}
 
 	var vehicle models.Vehicle
 	if err := h.db.First(&vehicle, req.VehicleID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "vehicle not found"})
+			respondWithError(c, http.StatusNotFound, "vehicle not found")
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch vehicle"})
+		respondWithError(c, http.StatusInternalServerError, "failed to fetch vehicle")
 		return
 	}
 
 	if vehicle.UserID != driverID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "vehicle does not belong to current user"})
+		respondWithError(c, http.StatusForbidden, "vehicle does not belong to current user")
 		return
 	}
 
 	if req.AvailableSeats > vehicle.SeatsTotal {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "available_seats cannot exceed vehicle seats_total"})
+		respondWithError(c, http.StatusBadRequest, "available_seats cannot exceed vehicle seats_total")
 		return
 	}
 
@@ -110,7 +110,7 @@ func (h *TripHandler) Create(c *gin.Context) {
 	}
 
 	if err := h.db.Create(&trip).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create trip"})
+		respondWithError(c, http.StatusInternalServerError, "failed to create trip")
 		return
 	}
 
@@ -130,19 +130,19 @@ func (h *TripHandler) Create(c *gin.Context) {
 func (h *TripHandler) ListMy(c *gin.Context) {
 	userIDValue, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found in context"})
+		respondWithError(c, http.StatusUnauthorized, "user not found in context")
 		return
 	}
 
 	driverID, ok := userIDValue.(uint)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user id in context"})
+		respondWithError(c, http.StatusUnauthorized, "invalid user id in context")
 		return
 	}
 
 	var trips []models.TripOffer
 	if err := h.db.Where("driver_id = ?", driverID).Order("created_at DESC").Find(&trips).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch trips"})
+		respondWithError(c, http.StatusInternalServerError, "failed to fetch trips")
 		return
 	}
 

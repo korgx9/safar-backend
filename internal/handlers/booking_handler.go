@@ -46,24 +46,24 @@ func NewBookingHandler(db *gorm.DB) *BookingHandler {
 func (h *BookingHandler) Create(c *gin.Context) {
 	passengerIDValue, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found in context"})
+		respondWithError(c, http.StatusUnauthorized, "user not found in context")
 		return
 	}
 
 	passengerID, ok := passengerIDValue.(uint)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user id in context"})
+		respondWithError(c, http.StatusUnauthorized, "invalid user id in context")
 		return
 	}
 
 	var req models.CreateBookingRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		respondWithError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if req.RequestedSeats < 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "requested_seats must be at least 1"})
+		respondWithError(c, http.StatusBadRequest, "requested_seats must be at least 1")
 		return
 	}
 
@@ -121,11 +121,11 @@ func (h *BookingHandler) Create(c *gin.Context) {
 	if err != nil {
 		var httpErr *bookingHTTPError
 		if errors.As(err, &httpErr) {
-			c.JSON(httpErr.Status, gin.H{"error": httpErr.Message})
+			respondWithError(c, httpErr.Status, httpErr.Message)
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create booking"})
+		respondWithError(c, http.StatusInternalServerError, "failed to create booking")
 		return
 	}
 
@@ -145,19 +145,19 @@ func (h *BookingHandler) Create(c *gin.Context) {
 func (h *BookingHandler) ListMy(c *gin.Context) {
 	passengerIDValue, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found in context"})
+		respondWithError(c, http.StatusUnauthorized, "user not found in context")
 		return
 	}
 
 	passengerID, ok := passengerIDValue.(uint)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user id in context"})
+		respondWithError(c, http.StatusUnauthorized, "invalid user id in context")
 		return
 	}
 
 	var bookings []models.Booking
 	if err := h.db.Where("passenger_id = ?", passengerID).Order("created_at DESC").Find(&bookings).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch bookings"})
+		respondWithError(c, http.StatusInternalServerError, "failed to fetch bookings")
 		return
 	}
 
@@ -181,20 +181,20 @@ func (h *BookingHandler) ListMy(c *gin.Context) {
 func (h *BookingHandler) Cancel(c *gin.Context) {
 	passengerIDValue, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found in context"})
+		respondWithError(c, http.StatusUnauthorized, "user not found in context")
 		return
 	}
 
 	passengerID, ok := passengerIDValue.(uint)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user id in context"})
+		respondWithError(c, http.StatusUnauthorized, "invalid user id in context")
 		return
 	}
 
 	bookingIDValue := c.Param("id")
 	bookingID, err := strconv.ParseUint(bookingIDValue, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid booking id"})
+		respondWithError(c, http.StatusBadRequest, "invalid booking id")
 		return
 	}
 
@@ -256,11 +256,11 @@ func (h *BookingHandler) Cancel(c *gin.Context) {
 	if err != nil {
 		var httpErr *bookingHTTPError
 		if errors.As(err, &httpErr) {
-			c.JSON(httpErr.Status, gin.H{"error": httpErr.Message})
+			respondWithError(c, httpErr.Status, httpErr.Message)
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to cancel booking"})
+		respondWithError(c, http.StatusInternalServerError, "failed to cancel booking")
 		return
 	}
 

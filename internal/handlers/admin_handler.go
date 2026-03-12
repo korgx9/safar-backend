@@ -33,7 +33,7 @@ func NewAdminHandler(db *gorm.DB) *AdminHandler {
 func (h *AdminHandler) CleanupExpiredTrips(c *gin.Context) {
 	expiredTripsCount, err := h.cleanupService.ExpireOldTrips()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to cleanup expired trips"})
+		respondWithError(c, http.StatusInternalServerError, "failed to cleanup expired trips")
 		return
 	}
 
